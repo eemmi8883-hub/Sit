@@ -1,0 +1,321 @@
+```html
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS GAMING STORE - Hệ Thống Bán Acc & Nạp Game Tự Động 24/7</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Chakra Petch & Be Vietnam Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Chakra+Petch:ital,wght@0,600;0,700;1,700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Be Vietnam Pro"', 'sans-serif'],
+                        gaming: ['"Chakra Petch"', 'sans-serif'],
+                    },
+                    colors: {
+                        cyber: {
+                            bg: '#070913',
+                            card: '#0f1426',
+                            cardHover: '#161d36',
+                            cyan: '#00f0ff',
+                            purple: '#9d4edd',
+                            pink: '#ff007f',
+                            border: '#1e294b'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { boxShadow: '0 0 10px rgba(0, 240, 255, 0.3), 0 0 20px rgba(157, 78, 221, 0.2)' },
+                            '100%': { boxShadow: '0 0 20px rgba(0, 240, 255, 0.6), 0 0 35px rgba(157, 78, 221, 0.5)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar & Cyber Effects */
+        body {
+            background-color: #070913;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(157, 78, 221, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 85% 30%, rgba(0, 240, 255, 0.1) 0%, transparent 45%),
+                linear-gradient(rgba(30, 41, 75, 0.2) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(30, 41, 75, 0.2) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(15, 20, 38, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+        }
+
+        .neon-border-cyan {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+            border-color: rgba(0, 240, 255, 0.4);
+        }
+
+        .neon-text-cyan {
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        .tab-active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(157, 78, 221, 0.25));
+            border-color: #00f0ff;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+        }
+
+        /* Custom subtle scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070913;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e294b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff;
+        }
+    </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-cyan-500/30 selection:text-cyan-200 pb-12">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Top Floating Bar (Edit Mode Toggle) -->
+    <div class="sticky top-0 z-40 glass-panel border-b border-slate-800/80 px-4 py-2.5">
+        <div class="max-w-2xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2 text-xs font-medium text-cyan-400">
+                <span class="relative flex h-2.5 w-2.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span>Hệ thống giao dịch tự động: <strong class="text-emerald-400">ONLINE</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btn-toggle-edit" onclick="toggleEditMode()" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all cursor-pointer">
+                    <i data-lucide="settings" class="w-3.5 h-3.5 text-cyan-400"></i>
+                    <span id="edit-btn-text">Tùy chỉnh Shop</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Edit Panel (Collapsible) -->
+    <div id="edit-panel" class="hidden max-w-2xl mx-auto mt-4 px-4">
+        <div class="glass-panel rounded-2xl p-5 border border-purple-500/40 shadow-xl">
+            <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+                <h3 class="font-gaming text-base font-bold text-purple-300 flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-4 h-4"></i> CHẾ ĐỘ TÙY CHỈNH THÔNG TIN SHOP
+                </h3>
+                <button onclick="toggleEditMode()" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Tên Shop</label>
+                    <input type="text" id="edit-shop-name" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Slogan / Danh hiệu</label>
+                    <input type="text" id="edit-shop-tagline" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-xs text-slate-400 mb-1">Mô tả ngắn</label>
+                    <textarea id="edit-shop-desc" rows="2" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Số Zalo Admin</label>
+                    <input type="text" id="edit-zalo" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">STK Ngân Hàng / Momo</label>
+                    <input type="text" id="edit-bank" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Link Website Chính</label>
+                    <input type="text" id="edit-web-url" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Link Fanpage Facebook</label>
+                    <input type="text" id="edit-fb-url" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400">
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mt-4 pt-3 border-t border-slate-800">
+                <button onclick="resetShopData()" class="text-xs text-rose-400 hover:text-rose-300 px-3 py-2 rounded-lg hover:bg-rose-500/10 transition">
+                    Khôi phục mặc định
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="exportHTML()" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 transition">
+                        <i data-lucide="code" class="w-3.5 h-3.5"></i> Xuất mã HTML
+                    </button>
+                    <button onclick="saveShopData()" class="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-lg transition">
+                        <i data-lucide="save" class="w-3.5 h-3.5"></i> Lưu Thay Đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="max-w-2xl mx-auto px-4 pt-6">
+
+        <!-- 1. HEADER / PROFILE CARD -->
+        <header class="glass-panel rounded-3xl p-6 relative overflow-hidden mb-6 neon-border-cyan">
+            <!-- Decorative Glow -->
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative flex flex-col items-center text-center">
+                <!-- Gaming SVG Avatar / Logo -->
+                <div class="relative mb-4 group">
+                    <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-600 to-purple-600 p-0.5 animate-glow shadow-xl">
+                        <div class="w-full h-full bg-cyber-bg rounded-2xl flex items-center justify-center overflow-hidden relative">
+                            <!-- Custom Cyber Esports Shield SVG -->
+                            <svg class="w-16 h-16" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="cyberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#00f0ff" />
+                                        <stop offset="100%" stop-color="#9d4edd" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M50 8L88 24V52C88 74 71 89 50 94C29 89 12 74 12 52V24L50 8Z" stroke="url(#cyberGrad)" stroke-width="4" fill="rgba(0,240,255,0.08)"/>
+                                <path d="M34 38L50 28L66 38V62L50 72L34 62V38Z" stroke="#00f0ff" stroke-width="3" fill="rgba(157,78,221,0.2)"/>
+                                <path d="M43 46L50 42L57 46V54L50 58L43 54V46Z" fill="#00f0ff"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <!-- Verified Floating Icon -->
+                    <div class="absolute -bottom-1.5 -right-1.5 bg-cyan-400 text-slate-950 p-1 rounded-full border-2 border-cyber-bg shadow-md" title="Đã xác minh uy tín">
+                        <i data-lucide="badge-check" class="w-4 h-4 stroke-[2.5]"></i>
+                    </div>
+                </div>
+
+                <!-- Shop Name & Verified Badge -->
+                <h1 id="display-shop-name" class="font-gaming text-2xl sm:text-3xl font-bold tracking-wider uppercase bg-gradient-to-r from-white via-cyan-200 to-purple-300 bg-clip-text text-transparent">
+                    NEXUS GAMING STORE
+                </h1>
+
+                <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-semibold">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-cyan-400"></i>
+                    <span id="display-shop-tagline">Uy Tín 100% • Giao Dịch Tự Động 24/7</span>
+                </div>
+
+                <p id="display-shop-desc" class="mt-3 text-sm text-slate-300 max-w-md leading-relaxed">
+                    Hệ thống cung cấp Acc Liên Quân, Free Fire, Valorant, Genshin trắng thông tin & Nạp game chiết khấu cao siêu tốc trong 30 giây.
+                </p>
+
+                <!-- Key Stats Grid -->
+                <div class="grid grid-cols-3 gap-2 sm:gap-4 w-full mt-6 pt-5 border-t border-slate-800/80">
+                    <div class="bg-slate-900/60 rounded-2xl p-3 border border-slate-800/80">
+                        <div class="font-gaming text-lg sm:text-xl font-bold text-cyan-400">15,800+</div>
+                        <div class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Acc Đã Bán</div>
+                    </div>
+                    <div class="bg-slate-900/60 rounded-2xl p-3 border border-slate-800/80">
+                        <div class="font-gaming text-lg sm:text-xl font-bold text-purple-400">30 Giây</div>
+                        <div class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Nạp Tự Động</div>
+                    </div>
+                    <div class="bg-slate-900/60 rounded-2xl p-3 border border-slate-800/80">
+                        <div class="font-gaming text-lg sm:text-xl font-bold text-amber-400 flex items-center justify-center gap-1">
+                            4.9/5 <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+                        </div>
+                        <div class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Đánh Giá</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. NAVIGATION TABS -->
+        <nav class="grid grid-cols-3 gap-2 p-1.5 glass-panel rounded-2xl mb-6 sticky top-14 z-30 shadow-lg">
+            <button onclick="switchTab('links')" id="tab-btn-links" class="tab-btn tab-active flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border border-transparent text-xs sm:text-sm font-semibold transition-all cursor-pointer">
+                <i data-lucide="link" class="w-4 h-4 text-cyan-400"></i>
+                <span>Liên Kết</span>
+            </button>
+            <button onclick="switchTab('accounts')" id="tab-btn-accounts" class="tab-btn flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border border-transparent text-slate-400 hover:text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer">
+                <i data-lucide="gamepad-2" class="w-4 h-4 text-purple-400"></i>
+                <span>Kho Acc VIP</span>
+            </button>
+            <button onclick="switchTab('topup')" id="tab-btn-topup" class="tab-btn flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border border-transparent text-slate-400 hover:text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer">
+                <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+                <span>Nạp Thẻ 24/7</span>
+            </button>
+        </nav>
+
+        <!-- TAB 1: BIO LINKS & SOCIAL MEDIA -->
+        <section id="tab-links" class="tab-content space-y-3.5">
+            <!-- Primary CTA Button: Main Website -->
+            <a id="link-website" href="#website" onclick="handleExternalLink(event, 'Website Bán Acc Tự Động')" class="group block relative p-4 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-blue-600/20 to-purple-600/20 border border-cyan-400/50 hover:border-cyan-300 transition-all hover:-translate-y-0.5 shadow-lg shadow-cyan-500/10">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-slate-950 shadow-md group-hover:scale-105 transition-transform">
+                            <i data-lucide="globe" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-gaming font-bold text-base sm:text-lg text-white">WEBSITE BÁN ACC CHÍNH THỨC</span>
+                                <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-cyan-400 text-slate-950">HOT</span>
+                            </div>
+                            <p class="text-xs text-cyan-200/80 mt-0.5">Giao dịch tự động 24/7 • Nhận nick ngay sau 5s</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-cyan-400 group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>
+
+            <!-- Quick Copy Cards (Zalo & Bank) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Zalo Copy -->
+                <div class="glass-panel rounded-2xl p-3.5 flex items-center justify-between hover:border-blue-400/50 transition">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400 shrink-0">
+                            <i data-lucide="message-circle" class="w-5 h-5"></i>
+                        </div>
+                        <div class="truncate">
+                            <div class="text-xs text-slate-400">Zalo Hỗ Trợ / Thu Mua</div>
+                            <div id="display-zalo" class="font-gaming font-bold text-sm text-white truncate">0988.999.888</div>
+                        </div>
+                    </div>
+                    <button onclick="copyText('display-zalo', 'Đã sao chép số Zalo Admin!')" class="shrink-0 ml-2 px-3 py-2 rounded-xl bg-blue-500/20 hover:bg-blue-500 text-blue-300 hover:text-white text-xs font-semibold transition flex items-center gap-1 cursor-pointer">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+                    </button>
+                </div>
+
+                <!-- Bank Copy -->
+                <div class="glass-panel rounded-2xl p-3.5 flex items-center justify-between hover:border-emerald-400/50 transition">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 shrink-0">
+                            <i data-lucide="landmark" class="w-5 h-5"></i>
+                        </div>
+                        <div class="truncate">
+                            <div class="text-xs text-slate-400">MB Bank / Momo Duy Nhất</div>
+                            <div id="display-bank" class="font-gaming font-bold text-sm text-white truncate">8888999900 (NGUYEN VAN A)</div>
+                        </div>
+                    </div>
+                    <button onclick="copyText('display-bank', 'Đã sao chép số tài khoản!')" class="shrink-0 ml-2 px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-white text-xs font-semibold transiti
